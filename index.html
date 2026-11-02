@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Gaucho Pass</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column. Navy app bar with Student / Scanner tabs, the ID card as the hero, stacked panels below. */
+:root {
+  --navy: #0C2D55;
+  --navy-2: #163F70;
+  --gold: #F3B61F;
+  --gold-ink: #2F2100;
+  --bg: #EDF1F6;
+  --surface: #FFFFFF;
+  --surface-2: #F4F7FB;
+  --ink: #0F1C2E;
+  --muted: #56667C;
+  --line: #D5DDE8;
+  --ok: #16804F;
+  --ok-bg: #E2F4E9;
+  --bad: #C2352C;
+  --bad-bg: #FBE7E5;
+  --warn: #8E5D00;
+  --warn-bg: #FDF1D6;
+  --ok-solid: #128A52;
+  --bad-solid: #C4342B;
+  --warn-solid: #B9790B;
+  --qr-bg: #FFFFFF;
+  --bar-ink: #FFFFFF;
+  --bar-muted: #A9BFDA;
+  --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --navy: #0A2343; --navy-2: #1A426F; --bg: #08111D; --surface: #111F31; --surface-2: #0D1928;
+    --ink: #E6ECF4; --muted: #93A4BA; --line: #233650; --ok: #52C98F; --ok-bg: #0E2D20;
+    --bad: #F2847A; --bad-bg: #3A1614; --warn: #EBB851; --warn-bg: #33260A; --bar-muted: #8EA7C6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --navy: #0A2343; --navy-2: #1A426F; --bg: #08111D; --surface: #111F31; --surface-2: #0D1928;
+  --ink: #E6ECF4; --muted: #93A4BA; --line: #233650; --ok: #52C98F; --ok-bg: #0E2D20;
+  --bad: #F2847A; --bad-bg: #3A1614; --warn: #EBB851; --warn-bg: #33260A; --bar-muted: #8EA7C6;
+  color-scheme: dark;
+}
+
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--navy); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+/* App bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--navy); color: var(--bar-ink); }
+.wrap { max-width: 460px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px 10px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mark { width: 34px; height: 34px; border-radius: 9px; background: var(--gold); color: var(--gold-ink); display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 15px; letter-spacing: -0.02em; flex: none; }
+.brand-name { font-family: var(--f-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; line-height: 1.1; }
+.brand-sub { font-size: 12px; color: var(--bar-muted); }
+.pill-test { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bar-ink); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; }
+.tab { background: none; border: 0; color: var(--bar-muted); font-weight: 600; padding: 10px 0 12px; border-bottom: 3px solid transparent; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--bar-ink); border-bottom-color: var(--gold); }
+
+.app { display: grid; gap: 16px; padding-block: 16px 48px; }
+
+/* Shared controls */
+.label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.field { display: grid; gap: 6px; }
+select { width: 100%; min-width: 0; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; cursor: pointer; text-align: center; }
+.btn:hover { border-color: var(--navy-2); }
+.btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn.primary:hover { background: var(--navy-2); }
+.btn.gold { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
+.panel h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+
+/* ID card */
+.idcard { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px -18px rgba(12,45,85,.45); }
+.id-strip { background: var(--navy); color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 3px solid var(--gold); }
+.id-strip span:last-child { color: var(--bar-muted); }
+.id-person { display: flex; gap: 14px; align-items: center; padding: 16px; }
+.avatar { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 20px; flex: none; }
+.avatar.lg { width: 64px; height: 64px; font-size: 22px; }
+.id-meta { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.s-name { font-family: var(--f-display); font-weight: 800; font-size: 21px; line-height: 1.15; letter-spacing: -0.01em; }
+.s-sub { font-size: 13px; color: var(--muted); }
+.perm { font-size: 13px; display: flex; gap: 6px; align-items: baseline; }
+.status { align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+.status.active { background: var(--ok-bg); color: var(--ok); }
+.status.lost { background: var(--bad-bg); color: var(--bad); }
+
+.qr-zone { padding: 0 16px 16px; display: grid; gap: 12px; justify-items: center; }
+.qr { width: min(260px, 72vw); aspect-ratio: 1; max-width: 100%; background: var(--qr-bg); border-radius: 16px; padding: 10px; border: 1px solid var(--line); display: grid; place-items: center; }
+.qr svg { width: 100%; height: 100%; display: block; }
+.qr-dead { width: min(260px, 72vw); max-width: 100%; aspect-ratio: 1; border-radius: 16px; border: 2px dashed var(--bad); background: var(--bad-bg); color: var(--bad); display: grid; place-content: center; text-align: center; gap: 6px; padding: 20px; }
+.qr-dead b { font-family: var(--f-display); font-size: 18px; }
+.qr-dead span { font-size: 13px; }
+.timer { width: min(260px, 72vw); max-width: 100%; display: grid; gap: 6px; }
+.timer-track { height: 6px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.timer-fill { height: 100%; background: var(--gold); transform-origin: left; transition: transform .25s linear; }
+.timer-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); gap: 8px; }
+.timer-row b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.access { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.access li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.access li:first-child { border-top: 0; padding-top: 0; }
+.access .where { display: grid; min-width: 0; }
+.access .where b { font-weight: 600; }
+.access .where span { font-size: 12px; color: var(--muted); }
+.tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.tag.yes { background: var(--ok-bg); color: var(--ok); }
+.tag.no { background: var(--bad-bg); color: var(--bad); }
+
+/* Scanner */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 13px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.reader { background: var(--navy); color: #fff; border-radius: 20px; padding: 18px; display: grid; gap: 14px; }
+.reader-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.reader-head .label { color: var(--bar-muted); }
+.reader-loc { font-family: var(--f-display); font-weight: 600; font-size: 18px; }
+.frame { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 14px; background: rgba(255,255,255,.06); display: grid; place-items: center; text-align: center; padding: 16px; font-size: 13px; color: var(--bar-muted); }
+.frame i { position: absolute; width: 26px; height: 26px; border: 3px solid var(--gold); }
+.frame i:nth-child(1) { top: 10px; left: 10px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px; }
+.frame i:nth-child(2) { top: 10px; right: 10px; border-left: 0; border-bottom: 0; border-top-right-radius: 8px; }
+.frame i:nth-child(3) { bottom: 10px; left: 10px; border-right: 0; border-top: 0; border-bottom-left-radius: 8px; }
+.frame i:nth-child(4) { bottom: 10px; right: 10px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px; }
+.frame.busy { color: #fff; }
+.reader-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reader-actions .btn:not(.gold) { background: transparent; color: #fff; border-color: rgba(255,255,255,.35); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row select { flex: 1 1 180px; width: auto; }
+.row .btn { flex: 0 0 auto; }
+
+.tests { display: grid; gap: 8px; }
+.test { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; border: 1px solid var(--line); background: var(--surface-2); border-radius: 12px; padding: 11px 13px; cursor: pointer; }
+.test:hover { border-color: var(--navy-2); }
+.test b { display: block; font-weight: 600; }
+.test span { display: block; font-size: 12px; color: var(--muted); }
+.test .expect { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--bad); }
+
+.log { list-style: none; margin: 0; padding: 0; display: grid; }
+.log li { display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line); }
+.log li:first-child { border-top: 0; padding-top: 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; }
+.dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); } .dot.warn { background: var(--warn); }
+.log .what { min-width: 0; }
+.log .what b { font-weight: 600; }
+.log .what span { display: block; font-size: 12px; color: var(--muted); }
+.log time { font-size: 12px; color: var(--muted); }
+.empty { font-size: 13px; color: var(--muted); }
+
+/* Result overlay */
+.result { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; color: #fff;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+.result.ok { background: var(--ok-solid); } .result.bad { background: var(--bad-solid); } .result.warn { background: var(--warn-solid); }
+.result-in { width: 100%; max-width: 380px; display: grid; gap: 16px; justify-items: center; text-align: center; animation: pop .22s ease-out; }
+@keyframes pop { from { transform: scale(.94); opacity: .4; } to { transform: none; opacity: 1; } }
+.r-icon { width: 84px; height: 84px; border-radius: 50%; background: rgba(255,255,255,.18); display: grid; place-items: center; }
+.r-icon svg { width: 46px; height: 46px; }
+.r-title { font-family: var(--f-display); font-weight: 800; font-size: 32px; line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
+.r-who { display: flex; gap: 12px; align-items: center; background: rgba(0,0,0,.16); border-radius: 16px; padding: 10px 14px 10px 10px; text-align: left; }
+.r-who .avatar { box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+.r-name { font-weight: 700; font-size: 17px; }
+.r-reason { margin: 0; max-width: 34ch; font-size: 15px; }
+.r-meta { font-size: 12px; opacity: .85; }
+.result .btn { background: #fff; color: #0F1C2E; border-color: #fff; min-width: 180px; }
+
+/* Wallet sheet */
+.sheet { position: fixed; inset: 0; z-index: 15; background: rgba(5,12,22,.55); display: grid; align-items: end; justify-items: center; }
+.sheet-in { width: 100%; max-width: 460px; background: var(--surface); border-radius: 22px 22px 0 0; display: grid; gap: 14px;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.sheet h2 { margin: 0; font-family: var(--f-display); font-size: 20px; }
+.pass { background: linear-gradient(160deg, #0C2D55, #173F6E); color: #fff; border-radius: 18px; padding: 16px; display: grid; gap: 14px; }
+.pass-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.pass-top .mark { width: 28px; height: 28px; font-size: 12px; }
+.pass-fields { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; }
+.pass-fields small { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #A9BFDA; }
+.pass-fields div { font-weight: 700; }
+.pass-qr { justify-self: center; width: 150px; aspect-ratio: 1; max-width: 100%; background: #fff; border-radius: 10px; padding: 8px; }
+.pass-qr svg { width: 100%; height: 100%; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .timer-fill { transition: none; }
+  .result-in { animation: none; }
+}
+</style>
+
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-top">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">GP</span>
+      <div>
+        <div class="brand-name">Gaucho Pass</div>
+        <div class="brand-sub">Digital ID tab · prototype</div>
+      </div>
+    </div>
+    <span class="pill-test">Test data</span>
+  </div>
+  <div class="wrap tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-student" data-mode="student" aria-selected="true">Student</button>
+    <button class="tab" role="tab" id="tab-scanner" data-mode="scanner" aria-selected="false">Scanner</button>
+  </div>
+</header>
+
+<main class="wrap app">
+  <!-- STUDENT MODE -->
+  <section id="view-student" class="app" style="padding:0" aria-labelledby="tab-student">
+    <label class="field" for="student-select">
+      <span class="label">Signed in as</span>
+      <select id="student-select"></select>
+    </label>
+
+    <article class="idcard" aria-label="Digital ID">
+      <div class="id-strip"><span>Access Card</span><span>UCSB</span></div>
+      <div class="id-person">
+        <div class="avatar" id="s-avatar"></div>
+        <div class="id-meta">
+          <div class="s-name" id="s-name"></div>
+          <div class="s-sub" id="s-sub"></div>
+          <div class="perm"><span class="label">Perm</span><span class="mono" id="s-perm"></span></div>
+        </div>
+        <span class="status" id="s-status"></span>
+      </div>
+      <div class="qr-zone">
+        <div class="qr" id="qr" role="img" aria-label="Rotating QR code"></div>
+        <div class="qr-dead" id="qr-dead" hidden>
+          <b>Card deactivated</b>
+          <span>This ID was reported lost. Reactivate it at the Access Card office to get a code.</span>
+        </div>
+        <div class="timer" id="timer">
+          <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+          <div class="timer-row"><span>New code in <b id="secs">30</b>s</span><span class="mono" id="code-peek"></span></div>
+        </div>
+      </div>
+    </article>
+
+    <section class="panel">
+      <h2>Works at</h2>
+      <ul class="access" id="s-access"></ul>
+    </section>
+
+    <button class="btn" id="wallet-open" type="button">Add to Apple Wallet or Google Wallet</button>
+  </section>
+
+  <!-- SCANNER MODE -->
+  <section id="view-scanner" class="app" style="padding:0" aria-labelledby="tab-scanner" hidden>
+    <div class="field">
+      <span class="label">Reader location</span>
+      <div class="chips" id="loc-chips"></div>
+    </div>
+
+    <div class="reader">
+      <div class="reader-head">
+        <span class="label">Reader</span>
+        <span class="reader-loc" id="reader-loc"></span>
+      </div>
+      <div class="frame" id="frame"><i></i><i></i><i></i><i></i><span id="frame-text">Hold the student's QR code inside the frame</span></div>
+      <div class="reader-actions">
+        <button class="btn gold" id="cam-btn" type="button">Scan with camera</button>
+        <button class="btn" id="file-btn" type="button">Upload screenshot</button>
+      </div>
+      <input class="vh" type="file" id="cam-input" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+      <input class="vh" type="file" id="file-input" accept="image/*" tabindex="-1" aria-hidden="true">
+    </div>
+
+    <section class="panel">
+      <h2>One-phone demo</h2>
+      <p class="hint">Scan a test student's live code without a second device.</p>
+      <div class="row">
+        <select id="demo-student" aria-label="Test student"></select>
+        <button class="btn primary" id="demo-scan" type="button">Scan live code</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Security tests</h2>
+      <div class="tests">
+        <button class="test" type="button" data-test="expired"><div><b>Old screenshot</b><span>A code from 90 seconds ago</span></div><span class="expect">Denied</span></button>
+        <button class="test" type="button" data-test="reuse"><div><b>Reused code</b><span>The same live code scanned twice</span></div><span class="expect">2nd denied</span></button>
+        <button class="test" type="button" data-test="fake"><div><b>Forged code</b><span>Real student ID, made-up digits</span></div><span class="expect">Denied</span></button>
+        <button class="test" type="button" data-test="lost"><div><b>Lost phone</b><span>Account reported lost</span></div><span class="expect">Denied</span></button>
+        <button class="test" type="button" data-test="mealplan"><div><b>No meal plan</b><span>Off-campus student at Carrillo</span></div><span class="expect">Denied</span></button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Scan log</h2>
+      <ol class="log" id="log"></ol>
+      <p class="empty" id="log-empty">Scans from this reader show up here.</p>
+    </section>
+  </section>
+</main>
+
+<div class="result" id="result" role="alertdialog" aria-modal="true" aria-labelledby="r-title" hidden>
+  <div class="result-in">
+    <div class="r-icon" id="r-icon"></div>
+    <div class="r-title" id="r-title"></div>
+    <div class="r-who" id="r-who">
+      <div class="avatar lg" id="r-avatar"></div>
+      <div><div class="r-name" id="r-name"></div><div class="mono" id="r-perm"></div></div>
+    </div>
+    <p class="r-reason" id="r-reason"></p>
+    <div class="r-meta" id="r-meta"></div>
+    <button class="btn" id="r-close" type="button">Next scan</button>
+  </div>
+</div>
+
+<div class="sheet" id="wallet" role="dialog" aria-modal="true" aria-labelledby="wallet-title" hidden>
+  <div class="sheet-in">
+    <h2 id="wallet-title">Wallet pass preview</h2>
+    <div class="pass">
+      <div class="pass-top"><span class="mark" aria-hidden="true">GP</span><span>Gaucho Pass</span></div>
+      <div class="pass-fields">
+        <div><small>Student</small><div id="w-name"></div></div>
+        <div><small>Perm</small><div class="mono" id="w-perm"></div></div>
+        <div><small>Meal plan</small><div id="w-meal"></div></div>
+        <div><small>Status</small><div id="w-status"></div></div>
+      </div>
+      <div class="pass-qr" id="w-qr"></div>
+    </div>
+    <p class="hint">Concept only. A real Wallet pass needs Apple and Google developer accounts and NFC readers at each door, so this prototype shows the design.</p>
+    <button class="btn primary" id="wallet-close" type="button">Done</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+(() => {
+  // ---------- Test data (fake students, fake secrets) ----------
+  const STEP = 30; // seconds each code lives
+  const ALL = ['dining', 'rec', 'bus', 'library'];
+  const STUDENTS = [
+    { id: '9900142', first: 'Jordan', last: 'Reyes', year: 'Second year', major: 'Mechanical Engineering', meal: 'Carrillo · 14 meals/wk', status: 'active', access: ALL, hue: 205, secret: 'gp-demo-7f3a91c2-reyes' },
+    { id: '9900287', first: 'Priya', last: 'Natarajan', year: 'First year', major: 'Biology', meal: 'De La Guerra · Unlimited', status: 'active', access: ALL, hue: 330, secret: 'gp-demo-1b88e04d-natarajan' },
+    { id: '9900355', first: 'Theo', last: 'Whitfield', year: 'Fourth year', major: 'Economics', meal: null, status: 'active', access: ['rec', 'bus', 'library'], hue: 28, secret: 'gp-demo-c4021f7a-whitfield' },
+    { id: '9900419', first: 'Lena', last: 'Park', year: 'Third year', major: 'Psychology', meal: 'Portola · 10 meals/wk', status: 'lost', access: ALL, hue: 160, secret: 'gp-demo-90de3b15-park' },
+    { id: '9900503', first: 'Sam', last: 'Okafor', year: 'First year', major: 'Computer Science', meal: 'Ortega · 14 meals/wk', status: 'active', access: ALL, hue: 262, secret: 'gp-demo-5e6c2a89-okafor' },
+  ];
+  const LOCS = [
+    { id: 'carrillo', name: 'Carrillo Dining Commons', short: 'Carrillo', type: 'dining' },
+    { id: 'dlg', name: 'De La Guerra Dining Commons', short: 'De La Guerra', type: 'dining' },
+    { id: 'rec', name: 'Recreation Center', short: 'Rec Cen', type: 'rec' },
+    { id: 'bus', name: 'MTD Bus · Line 11', short: 'MTD bus', type: 'bus' },
+    { id: 'lib', name: 'UCSB Library', short: 'Library', type: 'library' },
+  ];
+  const TYPES = {
+    dining: { label: 'Dining commons', detail: s => s.meal || 'No meal plan' },
+    rec: { label: 'Recreation Center', detail: () => 'Registered students' },
+    bus: { label: 'MTD buses', detail: () => 'Covered by student fees' },
+    library: { label: 'Library', detail: () => 'After-hours entry' },
+  };
+
+  const $ = id => document.getElementById(id);
+  const byId = id => STUDENTS.find(s => s.id === id);
+  const fullName = s => `${s.first} ${s.last}`;
+  const initials = s => s.first[0] + s.last[0];
+  const avatarBg = s => `hsl(${s.hue} 48% 38%)`;
+  const fmtTime = t => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+
+  // ---------- Storage (per-device convenience only) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('gp:' + k); return v == null ? d : v; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('gp:' + k, v); } catch {} },
+  };
+
+  // ---------- Time-based one-time codes (TOTP, RFC 6238, HMAC-SHA1 via Web Crypto) ----------
+  const enc = new TextEncoder();
+  const keys = {};
+  const keyFor = secret => keys[secret] || (keys[secret] = crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']));
+  const windowAt = (t = Date.now()) => Math.floor(t / 1000 / STEP);
+  async function totp(secret, counter) {
+    const buf = new ArrayBuffer(8);
+    const dv = new DataView(buf);
+    dv.setUint32(0, Math.floor(counter / 2 ** 32));
+    dv.setUint32(4, counter >>> 0);
+    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', await keyFor(secret), buf));
+    const o = sig[sig.length - 1] & 15;
+    const bin = ((sig[o] & 127) << 24) | (sig[o + 1] << 16) | (sig[o + 2] << 8) | sig[o + 3];
+    return String(bin % 1e6).padStart(6, '0');
+  }
+  const payload = (s, code) => `GAUCHOPASS|v1|${s.id}|${code}`;
+
+  // ---------- QR rendering ----------
+  function qrSvg(text) {
+    if (typeof qrcode === 'undefined') return '<p class="hint" style="color:#0F1C2E;text-align:center">QR library didn\'t load. Check your connection and reload.</p>';
+    const q = qrcode(0, 'M');
+    q.addData(text);
+    q.make();
+    return q.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+  }
+
+  // ---------- State ----------
+  const state = {
+    mode: 'student',
+    studentId: store.get('student', STUDENTS[0].id),
+    locId: store.get('loc', LOCS[0].id),
+    used: new Map(), // "id:code" -> time first accepted
+    log: [],
+    lastWin: -1,
+    currentPayload: '',
+  };
+  if (!byId(state.studentId)) state.studentId = STUDENTS[0].id;
+  if (!LOCS.find(l => l.id === state.locId)) state.locId = LOCS[0].id;
+  const loc = () => LOCS.find(l => l.id === state.locId);
+
+  // ---------- Mode switching ----------
+  function setMode(mode) {
+    state.mode = mode;
+    $('view-student').hidden = mode !== 'student';
+    $('view-scanner').hidden = mode !== 'scanner';
+    $('tab-student').setAttribute('aria-selected', mode === 'student');
+    $('tab-scanner').setAttribute('aria-selected', mode === 'scanner');
+    store.set('mode', mode);
+    if (location.hash !== '#' + mode) { try { history.replaceState(null, '', '#' + mode); } catch {} }
+    if (mode === 'student') { state.lastWin = -1; tick(); keepAwake(); }
+  }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  window.addEventListener('hashchange', () => {
+    const h = location.hash.slice(1);
+    if (h === 'student' || h === 'scanner') setMode(h);
+  });
+
+  let wakeLock = null;
+  async function keepAwake() {
+    try { if (!wakeLock && navigator.wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch {}
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.mode === 'student') keepAwake(); });
+
+  // ---------- Student view ----------
+  function fillStudentSelects() {
+    const opts = STUDENTS.map(s => `<option value="${s.id}">${fullName(s)} · ${s.id}${s.status === 'lost' ? ' (lost)' : ''}</option>`).join('');
+    $('student-select').innerHTML = opts;
+    $('demo-student').innerHTML = opts;
+    $('student-select').value = state.studentId;
+    $('demo-student').value = STUDENTS[0].id;
+  }
+  $('student-select').addEventListener('change', e => {
+    state.studentId = e.target.value;
+    store.set('student', state.studentId);
+    renderStudent();
+  });
+
+  function renderStudent() {
+    const s = byId(state.studentId);
+    const av = $('s-avatar');
+    av.textContent = initials(s);
+    av.style.background = avatarBg(s);
+    $('s-name').textContent = fullName(s);
+    $('s-sub').textContent = `${s.year} · ${s.major}`;
+    $('s-perm').textContent = s.id;
+    const st = $('s-status');
+    st.textContent = s.status === 'active' ? 'Active' : 'Lost';
+    st.className = 'status ' + s.status;
+    const live = s.status === 'active';
+    $('qr').hidden = !live;
+    $('timer').hidden = !live;
+    $('qr-dead').hidden = live;
+    $('s-access').innerHTML = Object.keys(TYPES).map(t => {
+      const ok = live && s.access.includes(t);
+      const why = !live ? 'Card deactivated' : TYPES[t].detail(s);
+      return `<li><div class="where"><b>${TYPES[t].label}</b><span>${why}</span></div><span class="tag ${ok ? 'yes' : 'no'}">${ok ? 'Allowed' : 'No access'}</span></li>`;
+    }).join('');
+    state.lastWin = -1;
+    tick();
+  }
+
+  let rendering = false;
+  async function tick() {
+    const now = Date.now();
+    const w = windowAt(now);
+    const left = STEP - ((now / 1000) % STEP);
+    $('secs').textContent = Math.max(1, Math.ceil(left));
+    $('timer-fill').style.transform = `scaleX(${left / STEP})`;
+    if (state.mode !== 'student' || rendering || w === state.lastWin) return;
+    const s = byId(state.studentId);
+    if (s.status !== 'active') { state.lastWin = w; return; }
+    rendering = true;
+    try {
+      if (!(window.crypto && crypto.subtle)) {
+        $('qr').innerHTML = '<p class="hint" style="color:#0F1C2E;text-align:center">Codes need a secure page. Open this from an https link or as a file on your computer.</p>';
+        state.lastWin = w;
+        return;
+      }
+      const code = await totp(s.secret, w);
+      state.currentPayload = payload(s, code);
+      $('qr').innerHTML = qrSvg(state.currentPayload);
+      $('code-peek').textContent = code.slice(0, 3) + ' ' + code.slice(3);
+      state.lastWin = w;
+      if (!$('wallet').hidden) renderWallet();
+    } finally { rendering = false; }
+  }
+  setInterval(tick, 250);
+
+  // ---------- Wallet preview ----------
+  function renderWallet() {
+    const s = byId(state.studentId);
+    $('w-name').textContent = fullName(s);
+    $('w-perm').textContent = s.id;
+    $('w-meal').textContent = s.meal ? s.meal.split(' · ')[0] : 'None';
+    $('w-status').textContent = s.status === 'active' ? 'Active' : 'Lost';
+    $('w-qr').innerHTML = s.status === 'active' ? qrSvg(state.currentPayload) : '';
+    $('w-qr').hidden = s.status !== 'active';
+  }
+  $('wallet-open').addEventListener('click', () => { renderWallet(); $('wallet').hidden = false; $('wallet-close').focus(); });
+  $('wallet-close').addEventListener('click', () => { $('wallet').hidden = true; $('wallet-open').focus(); });
+  $('wallet').addEventListener('click', e => { if (e.target === $('wallet')) $('wallet').hidden = true; });
+
+  // ---------- Scanner: verification ----------
+  async function verify(text, location) {
+    const now = Date.now();
+    const base = { time: now, loc: location };
+    const parts = String(text || '').trim().split('|');
+    if (parts.length !== 4 || parts[0] !== 'GAUCHOPASS' || parts[1] !== 'v1') {
+      return { ...base, ok: false, title: 'Not a Gaucho Pass code', reason: 'This QR code didn\'t come from Gaucho Pass. Ask the student to open their Digital ID.' };
+    }
+    const s = byId(parts[2]);
+    if (!s) return { ...base, ok: false, title: 'Unknown ID', reason: 'No student account matches this code.' };
+    const code = parts[3];
+    const r = { ...base, student: s };
+    const w = windowAt(now);
+    let valid = code === await totp(s.secret, w);
+    // 5-second grace right after a code flips, so a scan mid-change still works
+    if (!valid && (now / 1000) % STEP < 5 && code === await totp(s.secret, w - 1)) valid = true;
+    if (!valid) {
+      for (let k = 1; k <= 20; k++) {
+        if (code === await totp(s.secret, w - k)) {
+          const ago = Math.round(now / 1000 - (w - k + 1) * STEP);
+          return { ...r, ok: false, title: 'Code expired', reason: `This code stopped working ${ago} seconds ago, so it's likely a screenshot. Ask ${s.first} to show their live screen.` };
+        }
+      }
+      return { ...r, ok: false, title: 'Invalid code', reason: `The code doesn't match ${s.first}'s current code. It may be forged or copied.` };
+    }
+    if (s.status !== 'active') {
+      return { ...r, ok: false, title: 'Card deactivated', reason: `${s.first}'s ID was reported lost. They need to reactivate it at the Access Card office.` };
+    }
+    const key = s.id + ':' + code;
+    if (state.used.has(key)) {
+      return { ...r, ok: false, title: 'Code already used', reason: `This exact code was accepted at ${fmtTime(state.used.get(key))}. Each code works once.` };
+    }
+    if (!s.access.includes(location.type)) {
+      return location.type === 'dining'
+        ? { ...r, ok: false, title: 'No meal plan', reason: `${s.first} doesn't have a meal plan, so this dining commons reader won't let them in.` }
+        : { ...r, ok: false, title: 'No access here', reason: `${s.first}'s account doesn't include ${location.name}.` };
+    }
+    state.used.set(key, now);
+    return { ...r, ok: true, title: 'Access granted', reason: `Welcome, ${s.first}.` };
+  }
+
+  // ---------- Scanner: UI ----------
+  const ICONS = {
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    bad: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M12 6v8M12 18h.01"/></svg>',
+  };
+
+  function renderLocs() {
+    $('loc-chips').innerHTML = LOCS.map(l => `<button class="chip" type="button" data-loc="${l.id}" aria-pressed="${l.id === state.locId}">${l.short}</button>`).join('');
+    $('reader-loc').textContent = loc().name;
+  }
+  $('loc-chips').addEventListener('click', e => {
+    const b = e.target.closest('[data-loc]');
+    if (!b) return;
+    state.locId = b.dataset.loc;
+    store.set('loc', state.locId);
+    renderLocs();
+  });
+
+  let lastFocus = null;
+  function showResult(r, tone) {
+    tone = tone || (r.ok ? 'ok' : 'bad');
+    const el = $('result');
+    el.className = 'result ' + tone;
+    $('r-icon').innerHTML = ICONS[tone];
+    $('r-title').textContent = r.title;
+    $('r-reason').textContent = r.reason;
+    if (r.student) {
+      $('r-who').hidden = false;
+      $('r-avatar').textContent = initials(r.student);
+      $('r-avatar').style.background = avatarBg(r.student);
+      $('r-name').textContent = fullName(r.student);
+      $('r-perm').textContent = 'Perm ' + r.student.id;
+    } else {
+      $('r-who').hidden = true;
+    }
+    $('r-meta').textContent = r.loc ? `${r.loc.name} · ${fmtTime(r.time)}` : '';
+    lastFocus = document.activeElement;
+    el.hidden = false;
+    $('r-close').focus();
+  }
+  function closeResult() {
+    $('result').hidden = true;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $('r-close').addEventListener('click', closeResult);
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('result').hidden) closeResult();
+    else if (!$('wallet').hidden) $('wallet').hidden = true;
+  });
+
+  function addLog(r) {
+    state.log.unshift(r);
+    state.log.length = Math.min(state.log.length, 25);
+    $('log-empty').hidden = state.log.length > 0;
+    $('log').innerHTML = state.log.map(x => `
+      <li>
+        <span class="dot ${x.ok ? 'ok' : 'bad'}"></span>
+        <div class="what"><b>${x.title}</b><span>${x.student ? fullName(x.student) + ' · ' : ''}${x.loc.short}</span></div>
+        <time class="mono">${fmtTime(x.time)}</time>
+      </li>`).join('');
+  }
+
+  async function runScan(text, location) {
+    const r = await verify(text, location || loc());
+    addLog(r);
+    showResult(r);
+    return r;
+  }
+
+  // Photo / screenshot scanning
+  async function decodeImage(file) {
+    if (typeof jsQR === 'undefined') throw new Error('lib');
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      for (const max of [1400, 900, 600]) {
+        const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const hit = jsQR(data.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
+        if (hit && hit.data) return hit.data;
+      }
+      return null;
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function handleFile(input) {
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    const frame = $('frame'), txt = $('frame-text');
+    frame.classList.add('busy');
+    txt.textContent = 'Reading code…';
+    try {
+      const text = await decodeImage(file);
+      if (!text) {
+        showResult({ ok: false, title: 'No QR code found', reason: 'Retake the photo with the whole code in frame and the phone screen turned up bright.', time: Date.now(), loc: loc() }, 'warn');
+      } else {
+        await runScan(text);
+      }
+    } catch (err) {
+      showResult({ ok: false, title: 'Couldn\'t read that image', reason: err && err.message === 'lib' ? 'The QR reader didn\'t load. Check your connection and reload.' : 'Try a different photo or a PNG/JPG screenshot.', time: Date.now(), loc: loc() }, 'warn');
+    } finally {
+      frame.classList.remove('busy');
+      txt.textContent = 'Hold the student\'s QR code inside the frame';
+    }
+  }
+  $('cam-btn').addEventListener('click', () => $('cam-input').click());
+  $('file-btn').addEventListener('click', () => $('file-input').click());
+  $('cam-input').addEventListener('change', e => handleFile(e.target));
+  $('file-input').addEventListener('change', e => handleFile(e.target));
+
+  // One-phone demo
+  $('demo-scan').addEventListener('click', async () => {
+    const s = byId($('demo-student').value);
+    await runScan(payload(s, await totp(s.secret, windowAt())));
+  });
+
+  // Security tests
+  const TESTS = {
+    async expired() {
+      const s = STUDENTS[0];
+      await runScan(payload(s, await totp(s.secret, windowAt() - 3)));
+    },
+    async reuse() {
+      const s = STUDENTS[4];
+      const p = payload(s, await totp(s.secret, windowAt()));
+      const first = await verify(p, loc());
+      addLog(first);
+      await runScan(p);
+    },
+    async fake() {
+      const s = STUDENTS[1];
+      const recent = new Set();
+      const w = windowAt();
+      for (let k = -1; k <= 21; k++) recent.add(await totp(s.secret, w - k));
+      let code;
+      do { code = String(Math.floor(Math.random() * 1e6)).padStart(6, '0'); } while (recent.has(code));
+      await runScan(payload(s, code));
+    },
+    async lost() {
+      const s = STUDENTS[3];
+      await runScan(payload(s, await totp(s.secret, windowAt())));
+    },
+    async mealplan() {
+      const s = STUDENTS[2];
+      await runScan(payload(s, await totp(s.secret, windowAt())), LOCS[0]);
+    },
+  };
+  document.querySelectorAll('[data-test]').forEach(b => b.addEventListener('click', () => TESTS[b.dataset.test]()));
+
+  // ---------- Boot ----------
+  fillStudentSelects();
+  renderLocs();
+  renderStudent();
+  const h = location.hash.slice(1);
+  setMode(h === 'scanner' || h === 'student' ? h : store.get('mode', 'student') === 'scanner' ? 'scanner' : 'student');
+})();
+</script>
+
+</body>
+</html>
