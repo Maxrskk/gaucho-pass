@@ -238,6 +238,11 @@ function openGuestLink(pass) {
 }
 
 function boot() {
+  // Never run inside another site's frame, where taps could be hijacked.
+  if (window.top !== window.self) {
+    document.body.textContent = 'Gaucho Pass cannot be shown inside another page. Open it directly.';
+    return;
+  }
   wireSheets();
   wireResult();
   wireLogin();

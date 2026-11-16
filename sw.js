@@ -71,8 +71,10 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
 
   if (url.origin === location.origin) {
-    // The page itself is saved under one name, whatever the address bar says.
-    e.respondWith(networkFirst(req, req.mode === 'navigate' ? 'index.html' : req));
+    // The app page is saved under one name, whatever follows the "?" or "#".
+    const scope = new URL(self.registration.scope).pathname;
+    const isAppPage = req.mode === 'navigate' && (url.pathname === scope || url.pathname === scope + 'index.html');
+    e.respondWith(networkFirst(req, isAppPage ? 'index.html' : req));
     return;
   }
 

@@ -211,6 +211,7 @@ export function createMockBackend(options = {}) {
     report_lost(ctx) {
       requireRole(ctx, 'student');
       if (!sessionTrusted(ctx)) fail('device_blocked');
+      if (rateLimitHit(`card:${ctx.uid}`, 3600) > 20) fail('rate_limited');
       deactivateCard(ctx.uid, ctx.uid, ctx.sessionId, 'self');
       return clientRpc.get_my_pass(ctx);
     },
@@ -222,6 +223,7 @@ export function createMockBackend(options = {}) {
       if (!s) fail('no_student');
       if (s.status === 'lost') {
         if (s.lost_by === 'admin') fail('admin_locked');
+        if (rateLimitHit(`card:${ctx.uid}`, 3600) > 20) fail('rate_limited');
         s.status = 'active';
         s.lost_by = null;
         s.status_changed_at = iso(now());

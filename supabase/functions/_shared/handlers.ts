@@ -52,6 +52,8 @@ function bearer(req: Request): string | null {
 }
 
 async function readJson(req: Request): Promise<{ ok: true; value: Record<string, unknown> } | { ok: false; message: string }> {
+  const declared = Number(req.headers.get('content-length') ?? '0');
+  if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) return { ok: false, message: 'Request is too large.' };
   let text: string;
   try {
     text = await req.text();

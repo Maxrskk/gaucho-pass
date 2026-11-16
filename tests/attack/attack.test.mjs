@@ -688,3 +688,18 @@ test('spamming verify-scan gets rate limited', async () => {
   const other = await verify(await signIn('scanner1'), 'spam', 'rec');
   assert.equal(other.status, 200, 'other scanners are not affected');
 });
+
+test('reporting lost and reactivating over and over is rate limited', async () => {
+  await resetDemo();
+  const theo = await signInNew('theo');
+  let limited = false;
+  for (let i = 0; i < 14 && !limited; i++) {
+    const lost = await rpc(theo, 'report_lost');
+    const back = await rpc(theo, 'reactivate_card');
+    limited = rpcRefused(lost, 'rate_limited') || rpcRefused(back, 'rate_limited');
+  }
+  assert.equal(limited, true, 'the 21st change within an hour is refused');
+  await resetDemo();
+  assert.equal((await passOf('theo', theo)).student.status, 'active');
+  sessions.delete('theo');
+});

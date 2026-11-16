@@ -495,6 +495,9 @@ begin
   if app.session_trusted(v_uid) is not true then
     raise exception 'device_blocked';
   end if;
+  if app.rate_limit_hit('card:' || v_uid::text, 3600) > 20 then
+    raise exception 'rate_limited';
+  end if;
   perform app.deactivate_card(v_uid, v_uid, app.session_id(), 'self');
   return public.get_my_pass();
 end $$;
@@ -519,6 +522,9 @@ begin
   if v_status = 'lost' then
     if v_by = 'admin' then
       raise exception 'admin_locked';
+    end if;
+    if app.rate_limit_hit('card:' || v_uid::text, 3600) > 20 then
+      raise exception 'rate_limited';
     end if;
     update public.students set status = 'active', lost_by = null, status_changed_at = now() where user_id = v_uid;
     insert into public.card_events (student_id, actor_id, action) values (v_uid, v_uid, 'reactivate');
