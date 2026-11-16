@@ -3,7 +3,7 @@
 // The browser only ever holds the publishable key and the signed-in user's own
 // session. What that user may read or do is decided on the server.
 
-import { SUPABASE_KEY, SUPABASE_URL } from './config.js';
+import { FUNCTION_REGION, SUPABASE_KEY, SUPABASE_URL } from './config.js';
 
 export class ApiError extends Error {
   constructor(code, message, status = 0, payload = null) {
@@ -38,7 +38,7 @@ async function accessToken() {
   throw out.error && isNetworkError(out.error) ? offline() : expired();
 }
 
-async function post(path, body, { timeoutMs = 10000, retried = false } = {}) {
+async function post(path, body, { timeoutMs = 10000, retried = false, headers = {} } = {}) {
   // Known to be offline: say so at once instead of waiting on retries.
   if (navigator.onLine === false) throw offline();
   const token = await accessToken();
@@ -48,7 +48,7 @@ async function post(path, body, { timeoutMs = 10000, retried = false } = {}) {
   try {
     res = await fetch(SUPABASE_URL + path, {
       method: 'POST',
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...headers },
       body: JSON.stringify(body ?? {}),
       signal: controller.signal,
       cache: 'no-store',
@@ -71,7 +71,7 @@ async function post(path, body, { timeoutMs = 10000, retried = false } = {}) {
     if (!retried) {
       let refreshed;
       try { refreshed = await client.auth.refreshSession(); } catch (err) { throw isNetworkError(err) ? offline() : expired(); }
-      if (refreshed.data?.session) return post(path, body, { timeoutMs, retried: true });
+      if (refreshed.data?.session) return post(path, body, { timeoutMs, retried: true, headers });
       if (refreshed.error && isNetworkError(refreshed.error)) throw offline();
     }
     throw expired();
@@ -92,8 +92,9 @@ async function post(path, body, { timeoutMs = 10000, retried = false } = {}) {
 /** Call a database function. */
 export const rpc = (name, args = {}, options) => post(`/rest/v1/rpc/${name}`, args, options);
 
-/** Call an Edge Function. */
-export const fn = (name, body = {}, options) => post(`/functions/v1/${name}`, body, options);
+/** Call an Edge Function, in the database's region when one is configured. */
+export const fn = (name, body = {}, options = {}) =>
+  post(`/functions/v1/${name}`, body, { ...options, headers: FUNCTION_REGION ? { 'x-region': FUNCTION_REGION } : {} });
 
 export async function signIn(email, password) {
   let out;

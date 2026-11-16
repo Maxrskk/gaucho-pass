@@ -110,7 +110,7 @@ You need Node.js. Nothing is installed globally: the Supabase CLI runs through `
 
 1. **Create a project** at supabase.com (free plan, a West US region). In its settings keep the Data API on. "Automatically expose new tables" can stay off: the migration grants exactly what the app needs.
 2. **Turn off public sign-ups.** Authentication > Sign In / Providers > turn off "Allow new users to sign up". Only the test accounts should exist.
-3. **Put the project's URL and publishable key in the site.** Edit `js/config.js`, and change the same URL in the `Content-Security-Policy` line near the top of `index.html`. Use the publishable key (it starts with `sb_publishable_`). Never put a secret or `service_role` key in this repo.
+3. **Put the project's URL, publishable key and region in the site.** Edit `js/config.js`, and change the same URL in the `Content-Security-Policy` line near the top of `index.html`. Use the publishable key (it starts with `sb_publishable_`). Never put a secret or `service_role` key in this repo.
 4. **Sign the CLI in:** `npx supabase login`
 5. **Run the setup:** `bash tools/setup-supabase.sh`
 

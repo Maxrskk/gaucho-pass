@@ -6,6 +6,11 @@ export const SUPABASE_URL = 'https://vewlvgzlgcowyambvmep.supabase.co';
 export const SUPABASE_KEY = 'sb_publishable_MAwgpshW8ouU5vW-1mGZMQ_Vwz5B5yY';
 export const APP_VERSION = '2.0.0';
 
+// The region your Supabase project's database is in (Project Settings > General).
+// Scans are verified by an Edge Function; running it next to the database makes
+// each scan noticeably faster. Leave empty to let Supabase pick the nearest region.
+export const FUNCTION_REGION = 'us-east-1';
+
 // Test accounts for the sign-in picker. Emails only; passwords are never in the code.
 const DOMAIN = 'gauchopass.example';
 export const TEST_ACCOUNTS = [

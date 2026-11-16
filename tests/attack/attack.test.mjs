@@ -20,6 +20,8 @@ let apiKey = 'sb_publishable_mock';
 let passwords = {};
 let mock = null;
 let clockOffset = 0; // server time minus this computer's time
+const sessions = new Map(); // one reusable sign-in per account
+const roleOfAccount = (name) => (name === 'admin' ? 'admin' : name.startsWith('scanner') ? 'scanner' : 'student');
 
 function readEnvFile(path) {
   const out = {};
@@ -59,8 +61,6 @@ after(async () => {
 
 // ---------- tiny client ----------
 
-const roleOfAccount = (name) => (name === 'admin' ? 'admin' : name.startsWith('scanner') ? 'scanner' : 'student');
-const sessions = new Map();
 
 async function call(path, { method = 'POST', token, body, headers = {}, raw } = {}) {
   const res = await fetch(base + path, {
@@ -148,9 +148,11 @@ test('not signed in: no tables, no functions, no scans', async () => {
 });
 
 test('seeding needs the setup token', async () => {
-  assert.equal((await demo(null, { action: 'seed' })).status, 403);
-  assert.equal((await demo(null, { action: 'seed' }, { 'x-setup-token': 'guess-guess-guess-guess' })).status, 403);
-  assert.equal((await demo(await signIn('admin'), { action: 'seed' })).status, 403, 'even an admin login is not enough');
+  // 403 = wrong token. 503 = the token was removed from Supabase secrets after setup, so nobody can seed.
+  const refusedSeed = (out) => [403, 503].includes(out.status);
+  assert.ok(refusedSeed(await demo(null, { action: 'seed' })));
+  assert.ok(refusedSeed(await demo(null, { action: 'seed' }, { 'x-setup-token': 'guess-guess-guess-guess' })));
+  assert.ok(refusedSeed(await demo(await signIn('admin'), { action: 'seed' })), 'even an admin login is not enough');
 });
 
 // ---------- 2. One student reading another student's data ----------
@@ -325,7 +327,6 @@ test('malformed requests get a clear 400', async () => {
   const bad = [
     await verify(scanner, payload, undefined),
     await verify(scanner, payload, 'no-such-place'),
-    await verify(scanner, payload, '../../etc/passwd'),
     await verify(scanner, 12345, 'rec'),
     await verify(scanner, 'x'.repeat(2500), 'rec'),
     await call('/functions/v1/verify-scan', { token: scanner.token, raw: '{not json' }),
@@ -338,6 +339,9 @@ test('malformed requests get a clear 400', async () => {
     assert.equal(typeof out.body.message, 'string');
   }
   assert.equal((await call('/functions/v1/verify-scan', { method: 'GET', token: scanner.token })).status, 405);
+  // A path-traversal string is refused too: by the function (400), or by Supabase's firewall before it gets there (403).
+  const traversal = await verify(scanner, payload, '../../etc/passwd');
+  assert.ok([400, 403].includes(traversal.status), `path traversal got ${traversal.status}`);
 });
 
 test('CORS: only the app origins are allowed', async () => {
