@@ -44,8 +44,11 @@ export function signal(tone) {
   try { if (navigator.vibrate) navigator.vibrate(BUZZ[tone] ?? BUZZ.warn); } catch { /* not supported (iPhone) */ }
   try {
     unlock();
-    if (!ctx || ctx.state !== 'running') return false;
-    (SOUNDS[tone] ?? SOUNDS.warn)();
+    if (!ctx) return false;
+    const play = () => (SOUNDS[tone] ?? SOUNDS.warn)();
+    // Right after the first tap the audio may still be waking up: play as soon as it is ready.
+    if (ctx.state === 'running') play();
+    else ctx.resume().then(play).catch(() => {});
     return true;
   } catch {
     return false;
