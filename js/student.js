@@ -24,7 +24,6 @@ const state = {
   code: '',
   shownAt: 0,
   rendering: false,
-  syncing: false,
   tickTimer: null,
   pollTimer: null,
 };
@@ -89,13 +88,31 @@ function markShown() {
 
 // ---------- Talking to the server ----------
 
-async function sync() {
-  if (state.syncing || !state.userId) return;
-  state.syncing = true;
+/** Refresh from the server. If a refresh is already running, one more runs right after it. */
+let syncRunning = null;
+let syncQueued = false;
+function sync() {
+  if (syncRunning) {
+    syncQueued = true;
+    return syncRunning;
+  }
+  syncRunning = syncOnce().finally(() => {
+    syncRunning = null;
+    if (syncQueued) {
+      syncQueued = false;
+      sync();
+    }
+  });
+  return syncRunning;
+}
+
+async function syncOnce() {
+  if (!state.userId) return;
   const forUser = state.userId;
   const sent = Date.now();
   try {
-    const out = await rpc('get_my_pass');
+    // Tell the server which secret this device already holds, so it is not sent again.
+    const out = await rpc('get_my_pass', { p_have_version: state.key ? state.keyVersion : null });
     if (state.userId !== forUser) return;
     noteServerTime(out.server_now, sent, Date.now());
     state.online = true;
@@ -111,8 +128,6 @@ async function sync() {
     } else {
       app.fail(err, { quiet: err.code !== 'not_signed_in' });
     }
-  } finally {
-    state.syncing = false;
   }
 }
 
@@ -126,7 +141,7 @@ async function adopt(out) {
       await saveKey(state.userId, out.secret_version, state.key);
       forgetCode(); // never leave a code from the old key on screen
     }
-  } else if (state.key) {
+  } else if (state.key && out.student?.status !== 'active') {
     // The card is not active: this device should hold nothing that can make codes.
     state.key = null;
     state.keyVersion = 0;
@@ -436,7 +451,8 @@ async function onGuestListClick(e) {
     const yes = await confirmSheet({ title: 'Cancel this guest pass?', text: 'The code stops working straight away.', yes: 'Cancel pass', danger: true });
     if (!yes) return;
     try {
-      await adopt(await rpc('revoke_guest_pass', { p_id: revoke.dataset.revoke }));
+      await rpc('revoke_guest_pass', { p_id: revoke.dataset.revoke });
+      await sync();
       toast('Guest pass cancelled.');
     } catch (err) {
       app.fail(err);

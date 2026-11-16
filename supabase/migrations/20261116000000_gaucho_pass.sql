@@ -457,7 +457,9 @@ begin
 end $$;
 
 -- STUDENT: my own card, my own secret (only while the card is active), server time.
-create or replace function public.get_my_pass() returns jsonb
+-- The phone says which version of the secret it already holds, so the secret is
+-- sent once per device and again only after it changes.
+create or replace function public.get_my_pass(p_have_version integer default null) returns jsonb
 language plpgsql volatile security definer set search_path = ''
 as $$
 declare
@@ -479,7 +481,8 @@ begin
     'device_blocked', false,
     'server_now', app.now_ms(),
     'student', v_card,
-    'secret', case when v_card ->> 'status' = 'active' then encode(v_sec.secret, 'hex') end,
+    'secret', case when v_card ->> 'status' = 'active' and p_have_version is distinct from v_sec.version
+                   then encode(v_sec.secret, 'hex') end,
     'secret_version', v_sec.version,
     'guest_passes', app.guest_passes_json(v_uid));
 end $$;
@@ -610,7 +613,7 @@ begin
   end if;
   update public.guest_passes set revoked_at = now()
    where id = p_id and host_id = v_uid and used_at is null and revoked_at is null;
-  return public.get_my_pass();
+  return jsonb_build_object('ok', true);
 end $$;
 
 -- SCANNER: my own recent scans, with the names the scanner was already shown.
@@ -1088,7 +1091,7 @@ end $$;
 
 revoke all on function
   public.bootstrap(),
-  public.get_my_pass(),
+  public.get_my_pass(integer),
   public.report_lost(),
   public.reactivate_card(),
   public.create_guest_pass(text, text),
@@ -1109,7 +1112,7 @@ from public, anon, authenticated;
 -- Signed-in users. Each function checks the caller's role itself.
 grant execute on function
   public.bootstrap(),
-  public.get_my_pass(),
+  public.get_my_pass(integer),
   public.report_lost(),
   public.reactivate_card(),
   public.create_guest_pass(text, text),

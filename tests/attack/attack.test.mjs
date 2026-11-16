@@ -703,3 +703,16 @@ test('reporting lost and reactivating over and over is rate limited', async () =
   assert.equal((await passOf('theo', theo)).student.status, 'active');
   sessions.delete('theo');
 });
+
+test('the secret is sent to a device once, not on every refresh', async () => {
+  await resetDemo();
+  const jordan = await signIn('jordan');
+  const first = await rpc(jordan, 'get_my_pass');
+  assert.match(first.body.secret, /^[0-9a-f]{40}$/);
+  const again = await rpc(jordan, 'get_my_pass', { p_have_version: first.body.secret_version });
+  assert.equal(again.status, 200);
+  assert.equal(again.body.secret, null, 'a device that already has this version is not sent it again');
+  assert.equal(again.body.student.perm, '9900142');
+  const stale = await rpc(jordan, 'get_my_pass', { p_have_version: first.body.secret_version - 1 });
+  assert.equal(stale.body.secret, first.body.secret, 'a device with an old version gets the current one');
+});

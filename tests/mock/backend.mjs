@@ -193,7 +193,7 @@ export function createMockBackend(options = {}) {
       };
     },
 
-    get_my_pass(ctx) {
+    get_my_pass(ctx, { p_have_version = null } = {}) {
       requireRole(ctx, 'student');
       if (!sessionTrusted(ctx)) return { device_blocked: true, server_now: now() };
       refreshSwipes(ctx.uid);
@@ -202,7 +202,7 @@ export function createMockBackend(options = {}) {
       if (!card || !sec) fail('no_student');
       return {
         device_blocked: false, server_now: now(), student: card,
-        secret: card.status === 'active' ? sec.secret : null,
+        secret: card.status === 'active' && p_have_version !== sec.version ? sec.secret : null,
         secret_version: sec.version,
         guest_passes: guestPassesJson(ctx.uid),
       };
@@ -264,7 +264,7 @@ export function createMockBackend(options = {}) {
       if (!sessionTrusted(ctx)) fail('device_blocked');
       const g = state.guestPasses.get(p_id);
       if (g && g.host_id === ctx.uid && !g.used_at && !g.revoked_at) g.revoked_at = now();
-      return clientRpc.get_my_pass(ctx);
+      return { ok: true };
     },
 
     my_recent_scans(ctx, { p_limit } = {}) {
