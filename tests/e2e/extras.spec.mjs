@@ -35,7 +35,7 @@ test('admin dashboard: live scans from every scanner, deactivate a student, rese
 
   // Stats
   await admin.page.click('#tabs [data-route="stats"]');
-  await expect(admin.page.locator('#loc-bars .bar-row')).toHaveCount(5);
+  await expect(admin.page.locator('#loc-bars .loc-row')).toHaveCount(5);
   await expect(admin.page.locator('#loc-bars')).toContainText('1 granted · 1 denied');
   await expect(admin.page.locator('#reason-list')).toContainText('Invalid code');
 

@@ -111,11 +111,11 @@ function render() {
     $('loc-bars').innerHTML = html`${d.locations.map((l) => {
       const total = l.granted + l.denied;
       const width = (n) => `${((n / max) * 100).toFixed(1)}%`;
-      return html`<div class="bar-row">
-        <div class="bar-top"><b>${l.name}</b><span>${l.granted} granted · ${l.denied} denied</span></div>
-        <div class="bar-track ${total === 0 ? 'empty' : ''}" role="img" aria-label="${l.name}: ${l.granted} granted, ${l.denied} denied">
-          ${l.granted > 0 ? html`<div class="bar-seg bar-ok" style="width:${width(l.granted)}" title="${l.name}: ${l.granted} granted"></div>` : ''}
-          ${l.denied > 0 ? html`<div class="bar-seg bar-bad" style="width:${width(l.denied)}" title="${l.name}: ${l.denied} denied"></div>` : ''}
+      return html`<div class="loc-row">
+        <div class="loc-head"><b>${l.name}</b><span>${l.granted} granted · ${l.denied} denied</span></div>
+        <div class="loc-track ${total === 0 ? 'empty' : ''}" role="img" aria-label="${l.name}: ${l.granted} granted, ${l.denied} denied">
+          ${l.granted > 0 ? html`<div class="loc-seg seg-ok" style="width:${width(l.granted)}" title="${l.name}: ${l.granted} granted"></div>` : ''}
+          ${l.denied > 0 ? html`<div class="loc-seg seg-bad" style="width:${width(l.denied)}" title="${l.name}: ${l.denied} denied"></div>` : ''}
         </div>
       </div>`;
     })}`;

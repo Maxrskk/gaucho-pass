@@ -14,7 +14,7 @@ const TYPES = {
   '.webmanifest': 'application/manifest+json', '.woff2': 'font/woff2', '.md': 'text/markdown; charset=utf-8',
 };
 // Never hand out local secrets or tooling, even on localhost.
-const BLOCKED = /(^|\/)(\.|node_modules\/|supabase\/|tests\/|tools\/|LOGINS)/;
+const BLOCKED = /(^|\/)(\.|node_modules\/|supabase\/|tests\/|tools\/|LOGINS)|\.local(\.|$)/;
 
 http.createServer((req, res) => {
   let path;

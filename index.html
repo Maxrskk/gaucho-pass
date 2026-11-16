@@ -137,8 +137,8 @@
         <span class="reader-loc" id="reader-loc"></span>
       </div>
       <div class="frame" id="frame">
-        <video id="cam" playsinline muted hidden></video>
         <i></i><i></i><i></i><i></i>
+        <video id="cam" playsinline muted hidden></video>
         <span id="frame-text">Start the camera, then hold the student's QR code inside the frame</span>
       </div>
       <div class="reader-actions">
@@ -219,7 +219,7 @@
   <section id="view-stats" class="stack" data-view="stats" hidden>
     <section class="panel">
       <h2>Scans by location</h2>
-      <div class="legend"><span><i class="bar-ok"></i>Granted</span><span><i class="bar-bad"></i>Denied</span></div>
+      <div class="legend"><span><i class="seg-ok"></i>Granted</span><span><i class="seg-bad"></i>Denied</span></div>
       <div class="bars" id="loc-bars"></div>
       <p class="empty" id="bars-empty">No scans yet.</p>
     </section>
@@ -256,7 +256,7 @@
     </section>
     <section class="panel">
       <div class="panel-head"><h2>Demo script</h2><button class="btn small" type="button" id="script-clear">Untick all</button></div>
-      <p class="hint">Two phones: one signed in as a student, one as a scanner. Tick each step as you go.</p>
+      <p class="hint">Phone A is the student, phone B is the scanner, and a laptop plays the second reader, the student's other device and the admin. Tick each step as you go.</p>
       <ol class="steps" id="script"></ol>
     </section>
     <div class="account"><span>Signed in as <b data-me></b></span><button class="linkish" type="button" data-signout>Sign out</button></div>

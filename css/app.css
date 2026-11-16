@@ -76,8 +76,8 @@ button, select, input { font: inherit; color: inherit; }
 select { width: 100%; min-width: 0; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 16px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; cursor: pointer; text-align: center; }
 .btn:hover { border-color: var(--navy-2); }
-.btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; }
-.btn.primary:hover { background: var(--navy-2); }
+.btn.primary { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-ink); }
+.btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
 .btn.gold { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
 .panel h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
@@ -123,7 +123,7 @@ select { width: 100%; min-width: 0; padding: 11px 12px; border-radius: 12px; bor
 /* Scanner */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 13px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.chip[aria-pressed="true"] { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-ink); }
 .reader { background: var(--navy); color: #fff; border-radius: 20px; padding: 18px; display: grid; gap: 14px; }
 .reader-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .reader-head .label { color: var(--bar-muted); }
@@ -288,17 +288,17 @@ input::placeholder { color: var(--muted); opacity: .8; }
 .tile .num small { font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
 .tile .cap { font-size: 12px; color: var(--muted); }
 .bars { display: grid; gap: 10px; }
-.bar-row { display: grid; gap: 4px; }
-.bar-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
-.bar-top b { font-weight: 600; }
-.bar-top span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.bar-track { display: flex; gap: 2px; height: 12px; border-radius: 4px; overflow: hidden; }
-.bar-track.empty { background: var(--surface-2); height: 4px; margin: 4px 0; }
-.bar-seg { min-width: 3px; }
+.loc-row { display: grid; gap: 4px; }
+.loc-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.loc-head b { font-weight: 600; }
+.loc-head span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.loc-track { display: flex; gap: 2px; height: 12px; border-radius: 4px; overflow: hidden; }
+.loc-track.empty { background: var(--surface-2); height: 4px; margin: 4px 0; }
+.loc-seg { min-width: 3px; }
 /* Granted / denied chart colours. Checked with a colour-blindness validator in light
    and dark mode; denied also carries stripes so the two never rely on colour alone. */
-.bar-ok { background: var(--chart-ok); }
-.bar-bad { background-color: var(--chart-bad); background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 2px, transparent 2px 6px); }
+.seg-ok { background: var(--chart-ok); }
+.seg-bad { background-color: var(--chart-bad); background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.3) 0 2px, transparent 2px 6px); }
 .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 .kv { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 14px; margin: 0; }
@@ -336,3 +336,15 @@ input::placeholder { color: var(--muted); opacity: .8; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --chart-ok: #38AD76; --chart-bad: #C8402F; } }
 :root[data-theme="dark"] { --chart-ok: #38AD76; --chart-bad: #C8402F; }
 .avatar.photo.fallback { background: var(--navy-2); color: #fff; }
+
+/* Primary buttons and the selected chip: navy on light screens, gold on dark ones
+   (navy on a dark navy panel was nearly invisible). */
+:root { --primary-bg: #0C2D55; --primary-hover: #163F70; --primary-ink: #FFFFFF; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --primary-bg: #F3B61F; --primary-hover: #F7C64B; --primary-ink: #2F2100; }
+}
+:root[data-theme="dark"] { --primary-bg: #F3B61F; --primary-hover: #F7C64B; --primary-ink: #2F2100; }
+
+/* Sheets: padding counts inside the width, so content never touches the screen edge. */
+.sheet-in { box-sizing: border-box; }
+.reader-actions .btn { padding-inline: 8px; font-size: 14px; }
