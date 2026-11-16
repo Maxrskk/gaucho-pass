@@ -39,6 +39,8 @@ async function accessToken() {
 }
 
 async function post(path, body, { timeoutMs = 10000, retried = false } = {}) {
+  // Known to be offline: say so at once instead of waiting on retries.
+  if (navigator.onLine === false) throw offline();
   const token = await accessToken();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -117,6 +119,15 @@ export async function signOut() {
   } catch {
     // Even if the server can't be reached, the local session is removed.
   }
+}
+
+/**
+ * True if a session is saved on this device. Reads local storage only, so it
+ * answers instantly even with no connection (the session may still need a
+ * refresh before the server accepts it).
+ */
+export function hasStoredSession() {
+  try { return localStorage.getItem('gp-auth') !== null; } catch { return false; }
 }
 
 /** True if this device holds a session (it may need a refresh before use). */

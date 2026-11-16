@@ -211,12 +211,12 @@ function wireLogin() {
 
 async function resume() {
   const cached = store.getJSON('me', null);
-  const signedIn = await api.hasSession();
-  if (signedIn && cached && ROUTES[cached.role] && typeof cached.user_id === 'string') {
+  if (cached && ROUTES[cached.role] && typeof cached.user_id === 'string' && api.hasStoredSession()) {
     start(cached); // instant, and works offline; the server confirms in the background
     refreshMe();
     return;
   }
+  const signedIn = await api.hasSession();
   if (signedIn) {
     try {
       start(await api.rpc('bootstrap'));
@@ -258,7 +258,8 @@ function boot() {
     setHash('');
     if (state.me) { renderTabs(); state.route = 'guest'; go(ROUTES[state.me.role][0]); } else resume();
   });
-  document.addEventListener('pointerdown', unlock, { passive: true });
+  // Browsers only allow sound after a tap. Scanners need it; students never hear any.
+  document.addEventListener('pointerdown', () => { if (state.me && state.me.role !== 'student') unlock(); }, { passive: true });
 
   window.addEventListener('hashchange', () => {
     const pass = parseGuestLink(location.hash);

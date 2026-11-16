@@ -18,8 +18,8 @@ const STEPS = [
   ['Forged code', 'Phone B: Demo tools, Forged code. Red: Invalid code, with no name or photo shown.'],
   ['Lost phone', 'Laptop: sign in as Jordan and tap Report my ID lost. Now scan phone A again. Red: Card deactivated. Within about 10 seconds phone A signs itself out.'],
   ['Reactivate', 'Laptop: tap Reactivate my ID. The laptop gets a brand new code, and scanning it is green again. Phone A would have to sign in again.'],
-  ['Meal swipes', 'Phone A: sign in as Maya (1 swipe left). Phone B: choose Carrillo and scan. Green, 0 swipes left. Wait for the next code and scan again. Red: No swipes left.'],
-  ['Guest pass', 'Phone A: sign in as Jordan, Guest passes, New guest pass for the Rec Cen. Phone B: choose Rec Cen and scan it. Green: Guest of Jordan Reyes. Scan it again. Red: Guest pass already used.'],
+  ['Meal swipes', 'Phone A: sign in as Maya (1 swipe left). Phone B: choose Carrillo and scan. Green, 0 swipes left. Wait for the code to change, tap "Scan it again" and scan the new code. Red: No swipes left.'],
+  ['Guest pass', 'Phone A: sign in as Jordan, Guest passes, New guest pass for the Rec Cen. Phone B: choose Rec Cen and scan it. Green: Guest of Jordan Reyes. Tap "Scan it again". Red: Guest pass already used.'],
   ['Dashboard', 'Laptop: sign in as Admin. Live shows every scan you just made, with the reasons. Stats shows scans per location and the scan speed to compare with a card swipe.'],
   ['Wrap up', 'Admin: Reset demo data, so the next group starts clean.'],
 ];

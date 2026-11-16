@@ -81,3 +81,31 @@ test('a phone whose clock is right shows no warning', async ({ browser }) => {
   await expect(phone.page.locator('#qr svg')).toBeVisible();
   await expect(phone.page.locator('#id-clock')).toBeHidden();
 });
+
+test('offline with an expired sign-in token: the ID still opens straight away', async ({ browser, browserName }) => {
+  test.skip(browserName !== 'chromium', 'service workers are only testable in Chromium here');
+  // Tokens that last 5 seconds are already "due for refresh", like a phone opened hours later.
+  const backend = await newBackend({ accessTtlSec: 5 });
+  const net = { down: false };
+  const phone = await device(browser, backend, { serviceWorkers: 'allow', net });
+  await signIn(phone.page, 'sam');
+  await expect(phone.page.locator('#qr svg')).toBeVisible();
+  await phone.page.evaluate(() => navigator.serviceWorker.ready);
+  await expect.poll(() => phone.page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await phone.page.waitForTimeout(6000); // the token is now fully expired
+
+  net.down = true;
+  await phone.context.setOffline(true);
+  const started = Date.now();
+  await phone.page.reload();
+  await expect(phone.page.locator('#s-name')).toHaveText('Sam Okafor', { timeout: 5000 });
+  await expect(phone.page.locator('#qr svg')).toBeVisible({ timeout: 5000 });
+  expect(Date.now() - started).toBeLessThan(6000);
+  await expect(phone.page.locator('#id-flags')).toContainText('Offline');
+
+  // Reconnecting refreshes the sign-in quietly; the student is not thrown out.
+  net.down = false;
+  await phone.context.setOffline(false);
+  await expect(phone.page.locator('#id-flags')).not.toContainText('Offline', { timeout: 45000 });
+  await expect(phone.page.locator('#view-id')).toBeVisible();
+});
