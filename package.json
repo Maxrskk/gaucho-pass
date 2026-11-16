@@ -1,0 +1,19 @@
+{
+  "name": "gaucho-pass",
+  "private": true,
+  "description": "Dev tooling for the Gaucho Pass prototype. The site itself is static files with no build step.",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8080",
+    "test": "npm run test:unit && npm run test:attack:mock",
+    "test:unit": "node --test tests/unit/",
+    "test:attack:mock": "ATTACK_TARGET=mock node --test --test-concurrency=1 tests/attack/",
+    "test:attack:live": "ATTACK_TARGET=live node --test --test-concurrency=1 tests/attack/",
+    "test:e2e": "playwright test",
+    "logins": "node tools/make-logins.mjs",
+    "avatars": "node tools/make-avatars.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
+  }
+}

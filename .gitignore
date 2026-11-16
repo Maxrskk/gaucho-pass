@@ -1,0 +1,22 @@
+# Secrets and local-only files: never commit these
+.env
+.env.*
+*.local
+*.local.*
+LOGINS.local.md
+supabase/.temp/
+supabase/.branches/
+supabase/functions/.env
+
+# Dev tooling
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# OS and editor noise
+.DS_Store
+*.log
+.vscode/
+.idea/

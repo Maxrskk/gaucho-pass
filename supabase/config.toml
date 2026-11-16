@@ -1,0 +1,12 @@
+# Supabase CLI config for Gaucho Pass.
+# Both functions check the caller's sign-in themselves (see _shared/handlers.ts),
+# so the gateway's legacy JWT check is off. That also lets them answer CORS
+# preflights and return clear JSON errors.
+
+project_id = "gaucho-pass"
+
+[functions.verify-scan]
+verify_jwt = false
+
+[functions.demo]
+verify_jwt = false
