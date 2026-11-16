@@ -1,34 +1,80 @@
-// Gaucho Pass service worker: lets the app open offline and load fast.
-const CACHE = 'gaucho-pass-v1';
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon.png'];
-const LIBS = ['https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'];
+// Gaucho Pass service worker: lets the app open offline, so a student's ID
+// still shows its code without a connection.
+//
+// Strategy: when online, always fetch the newest files (so an update can never
+// leave old and new code mixed together); when offline or slow, use the copy
+// saved on this device. Everything the page needs is on this site, and calls to
+// Supabase are never cached.
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE)
-    .then(c => c.addAll(SHELL).then(() => Promise.all(LIBS.map(u => c.add(u).catch(() => {})))))
-    .then(() => self.skipWaiting()));
+const VERSION = 'gaucho-pass-v2.0.0';
+const SHELL = [
+  './', 'index.html', 'manifest.webmanifest', 'css/app.css', 'css/fonts.css',
+  'fonts/bricolage-grotesque-latin.woff2', 'fonts/jetbrains-mono-latin.woff2', 'fonts/public-sans-latin.woff2',
+  'js/app.js', 'js/api.js', 'js/config.js', 'js/ui.js', 'js/totp.js', 'js/keystore.js', 'js/feedback.js',
+  'js/reasons.js', 'js/result.js', 'js/student.js', 'js/scanner.js', 'js/admin.js', 'js/demo.js', 'js/guest.js',
+  'vendor/supabase.js', 'vendor/qrcode.js', 'vendor/jsQR.js',
+  'avatars/jordan.svg', 'avatars/priya.svg', 'avatars/theo.svg', 'avatars/lena.svg',
+  'avatars/sam.svg', 'avatars/maya.svg', 'avatars/dev.svg', 'avatars/aiko.svg',
+  'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon.png',
+];
+const NETWORK_TIMEOUT_MS = 3000;
+
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  );
 });
 
-self.addEventListener('fetch', e => {
+function fromNetwork(req, cacheKey) {
+  return fetch(req).then((res) => {
+    if (res && res.ok) {
+      const copy = res.clone();
+      caches.open(VERSION).then((c) => c.put(cacheKey, copy));
+    }
+    return res;
+  });
+}
+
+function networkFirst(req, cacheKey) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const useCache = () => caches.match(cacheKey).then((hit) => {
+      if (settled) return;
+      if (hit) { settled = true; resolve(hit); }
+    });
+    const timer = setTimeout(useCache, NETWORK_TIMEOUT_MS);
+    fromNetwork(req, cacheKey).then((res) => {
+      clearTimeout(timer);
+      if (settled) return;
+      if (res.ok) { settled = true; resolve(res); return; }
+      caches.match(cacheKey).then((hit) => { if (!settled) { settled = true; resolve(hit || res); } });
+    }).catch(() => {
+      clearTimeout(timer);
+      caches.match(cacheKey).then((hit) => {
+        if (settled) return;
+        settled = true;
+        if (hit) resolve(hit); else reject(new TypeError('offline and not saved'));
+      });
+    });
+  });
+}
+
+self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // The page itself: try the network first so updates show up, fall back to the saved copy offline.
-  if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); return res; })
-      .catch(() => caches.match('index.html')));
+
+  if (url.origin === location.origin) {
+    // The page itself is saved under one name, whatever the address bar says.
+    e.respondWith(networkFirst(req, req.mode === 'navigate' ? 'index.html' : req));
     return;
   }
-  // Everything else (icons, QR libraries, fonts): use the saved copy, refresh it in the background.
-  const sameOrigin = url.origin === location.origin;
-  const allowed = sameOrigin || url.hostname === 'cdn.jsdelivr.net' || url.hostname.endsWith('fonts.googleapis.com') || url.hostname.endsWith('fonts.gstatic.com');
-  if (!allowed) return;
-  e.respondWith(caches.match(req).then(hit => {
-    const net = fetch(req).then(res => { if (res && (res.ok || res.type === 'opaque')) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; }).catch(() => hit);
-    return hit || net;
-  }));
+
+  // Everything else (Supabase): straight to the network, never cached.
 });

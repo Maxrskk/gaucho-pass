@@ -1,8 +1,8 @@
 {
   "name": "Gaucho Pass",
   "short_name": "Gaucho Pass",
-  "description": "Digital ID prototype with a rotating QR code and a scanner mode.",
-  "start_url": "./#student",
+  "description": "Student prototype of a digital campus ID with a rotating QR code. Not affiliated with UC Santa Barbara.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -12,8 +12,5 @@
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ],
-  "shortcuts": [
-    { "name": "Scanner", "url": "./#scanner", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }

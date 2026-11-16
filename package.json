@@ -4,7 +4,7 @@
   "description": "Dev tooling for the Gaucho Pass prototype. The site itself is static files with no build step.",
   "type": "module",
   "scripts": {
-    "serve": "python3 -m http.server 8080",
+    "serve": "node tools/serve.mjs 8080",
     "test": "npm run test:unit && npm run test:attack:mock",
     "test:unit": "node --test tests/unit/",
     "test:attack:mock": "ATTACK_TARGET=mock node --test --test-concurrency=1 tests/attack/",
