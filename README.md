@@ -114,9 +114,8 @@ You need Node.js. Nothing is installed globally: the Supabase CLI runs through `
 4. **Sign the CLI in:** `npx supabase login`
 5. **Run the setup:** `bash tools/setup-supabase.sh`
 
-   It makes the private passwords (`.env.demo.local` and `LOGINS.local.md`, both git-ignored), links the project, applies `supabase/migrations/`, sends the passwords to Supabase secrets, deploys both Edge Functions, and creates the 11 test accounts.
+   It makes the private passwords (`.env.demo.local` and `LOGINS.local.md`, both git-ignored), links the project, applies `supabase/migrations/`, sends the passwords to Supabase secrets, deploys both Edge Functions, creates the 11 test accounts, and then removes the one-time setup token so nobody can seed again.
 6. **Check it:** `npm run test:attack:live` tries to break the real backend (see Tests below).
-7. **Lock the setup door.** Seeding is protected by a setup token. Once the accounts exist, remove it: `npx supabase secrets unset SETUP_TOKEN`. Seeding then stops working until you set it again.
 
 The same steps by hand, if you prefer to run them one at a time:
 
@@ -127,6 +126,7 @@ npx supabase db push --remote
 npx supabase secrets set --env-file .env.demo.local
 npx supabase functions deploy verify-scan demo --use-api
 node tools/seed.mjs
+npx supabase secrets unset SETUP_TOKEN
 ```
 
 If the CLI can't reach your database, paste the whole file in `supabase/migrations/` into the dashboard's SQL Editor and run it. It is safe to run more than once. The Edge Functions share code in `supabase/functions/_shared/`, so they are deployed with the CLI.

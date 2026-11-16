@@ -18,20 +18,23 @@ if [ ! -f .env.demo.local ]; then
   node tools/make-logins.mjs
 fi
 
-echo "== 1/5 Linking project $REF (if it asks for the database password, press Enter to skip)"
+echo "== 1/6 Linking project $REF (if it asks for the database password, press Enter to skip)"
 npx --yes supabase link --project-ref "$REF"
 
-echo "== 2/5 Applying the database migration"
+echo "== 2/6 Applying the database migration"
 npx --yes supabase db push --remote --yes
 
-echo "== 3/5 Sending the private settings to Supabase secrets"
+echo "== 3/6 Sending the private settings to Supabase secrets"
 npx --yes supabase secrets set --env-file .env.demo.local
 
-echo "== 4/5 Deploying the Edge Functions"
+echo "== 4/6 Deploying the Edge Functions"
 npx --yes supabase functions deploy verify-scan demo --use-api --yes
 
-echo "== 5/5 Creating the test accounts"
+echo "== 5/6 Creating the test accounts"
 node tools/seed.mjs
+
+echo "== 6/6 Removing the one-time setup token, so nobody can seed again"
+npx --yes supabase secrets unset SETUP_TOKEN --yes
 
 echo
 echo "Done. Next: npm run test:attack:live   (tries to break the real backend)"
